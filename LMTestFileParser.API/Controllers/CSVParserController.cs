@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace LMTestFileParser.Controllers;
+namespace LMTestFileParser.API.Controllers;
 
 
 [Route("api/[controller]")]
