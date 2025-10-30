@@ -19,4 +19,8 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LMTestFileParser.Application\LMTestFileParser.Application.csproj" />
+  </ItemGroup>
 </Project>
