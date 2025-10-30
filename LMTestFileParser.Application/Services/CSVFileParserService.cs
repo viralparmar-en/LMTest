@@ -8,8 +8,19 @@ namespace LMTestFileParser.Application.Services;
 // Parse the json file with bank names and column names for each bank
 public class CSVFileParserService : ICSVFileParserService
 {
+    public string _message { get; set; } = "";
+
     public bool IsValidFile(string filename)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var extension = Path.GetExtension(filename);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+
     }
 }

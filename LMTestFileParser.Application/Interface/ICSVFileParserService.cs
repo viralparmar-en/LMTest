@@ -6,12 +6,13 @@ namespace LMTestFileParser.Application.Interface;
 // Parse the json file with bank names and column names for each bank
 public interface ICSVFileParserService
 {
+    string _message { get; set; }
     bool IsValidFile(string filename);
-//     using (var reader = new StreamReader("file.csv"))
-// using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-// {
-//     var records = csv.GetRecords<MyClass>();
-//}
+    //     using (var reader = new StreamReader("file.csv"))
+    // using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+    // {
+    //     var records = csv.GetRecords<MyClass>();
+    //}
     // if (args.Length > 0)
     // {
     //     string bankName = args[0];

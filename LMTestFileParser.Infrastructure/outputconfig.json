@@ -1,0 +1,11 @@
+{
+    "BarclaysBank": {
+        "SimpleParams": [],
+        "ComplexParams": [
+            {
+                "SourceColunn": "",
+                "ColumnToExtract": ""
+            }
+        ]
+    }
+}

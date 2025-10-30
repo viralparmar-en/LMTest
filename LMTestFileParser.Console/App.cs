@@ -4,7 +4,6 @@ public class App
 {
     private readonly ICSVFileParserService _csvFileParserService;
     private readonly string[] _args;
-
     public App(ICSVFileParserService csvFileParserService, string[] args)
     {
         _csvFileParserService = csvFileParserService;
@@ -13,6 +12,7 @@ public class App
 
     public void Run()
     {
+
         if (_args.Length > 0)
         {
             string filePath = _args[0];
