@@ -1,11 +1,20 @@
 {
-    "BarclaysBank": {
-        "SimpleParams": [],
-        "ComplexParams": [
-            {
-                "SourceColunn": "",
-                "ColumnToExtract": ""
-            }
-        ]
-    }
+    "Configs": [
+        {
+            "BankName": "BarclaysBank",
+            "SimpleParamConfigs": [
+                {
+                    "SourceColunn": "ISIN",
+                    "DestinationColumnName": "ISIN"
+                }
+            ],
+            "ComplexParamConfigs": [
+                {
+                    "SourceColunn": "Notes",
+                    "ColumnToExtract": "Price",
+                    "DestinationColumnName": "EffectivePrice"
+                }
+            ]
+        }
+    ]
 }

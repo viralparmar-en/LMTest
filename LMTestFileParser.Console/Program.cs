@@ -7,10 +7,10 @@ try
     var services = new ServiceCollection();
 
     // Register services
-    services.AddScoped<ICSVFileParserService, CSVFileParserService>();
+    services.AddScoped<IFileParserService, CSVFileParserService>();
     services.AddScoped(provider =>
     {
-        var csvFileParserService = provider.GetRequiredService<ICSVFileParserService>();
+        var csvFileParserService = provider.GetRequiredService<IFileParserService>();
         return new App(csvFileParserService, args);
     });
 

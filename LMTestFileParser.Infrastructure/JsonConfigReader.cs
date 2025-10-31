@@ -1,28 +1,38 @@
 ﻿using System.Text.Json;
+using LMTestFileParser.Domain.Models;
 using LMTestFileParser.Infrastructure.Interface;
 
 namespace LMTestFileParser.Infrastructure;
 
-public class JsonConfigReader : IJsonConfigReader
+public class JsonConfigReader : IConfigReader
 {
     //Refactor
-    public T ReadJsonFile<T>(string fileName)
+    public ConfigModel GetConfigByBankName(string bankName)
     {
         try
         {
             string basePath = AppContext.BaseDirectory;
-            string filePath = Path.Combine(basePath, fileName);
+            string filePath = Path.Combine(basePath, "outputconfig.json");
 
             if (!File.Exists(filePath))
-                throw new FileNotFoundException(" file not found", filePath);
+                throw new FileNotFoundException("Config file not found", filePath);
 
             string jsonContent = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<T>(jsonContent);
+            var jsonObj = JsonSerializer.Deserialize<OutputConfigModel>(jsonContent);
+            if (jsonObj != null && jsonObj.Configs != null)
+            {
+                return jsonObj.Configs
+                            .FirstOrDefault(x => x.BankName == bankName) ?? new();
+            }
+            else
+            {
+                return new();
+            }
 
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return default;
+            throw new FileNotFoundException(ex.ToString());
         }
     }
 }

@@ -1,10 +1,12 @@
 using LMTestFileParser.Application.Interface;
+using LMTestFileParser.Infrastructure.Interface;
 
 public class App
 {
-    private readonly ICSVFileParserService _csvFileParserService;
+    private readonly IFileParserService _csvFileParserService;
+
     private readonly string[] _args;
-    public App(ICSVFileParserService csvFileParserService, string[] args)
+    public App(IFileParserService csvFileParserService, string[] args)
     {
         _csvFileParserService = csvFileParserService;
         _args = args;
@@ -12,7 +14,9 @@ public class App
 
     public void Run()
     {
-
+        var configObject = _csvFileParserService.GetOutputHeaderListFromConfig("BarclaysBank");
+        var service = _csvFileParserService.ProcessData("");
+        //Console.WriteLine(configObject.SimpleParamConfigs[0].SourceColunn);
         if (_args.Length > 0)
         {
             string filePath = _args[0];
@@ -27,6 +31,5 @@ public class App
                 Console.WriteLine("File not found.");
             }
         }
-        //_csvFileParserService.IsValidFile("");
     }
 }
