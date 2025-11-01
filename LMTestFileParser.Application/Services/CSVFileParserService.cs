@@ -118,7 +118,7 @@ public class CSVFileParserService : IFileParserService
                                     ComplexColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(source.SourceColunn!), source.SourceColunn!);
                                 }
                             }
-                            SaveFile(SimpleColumnIndexHeaderMap, ComplexColumnIndexHeaderMap, records);
+                            SaveFile(parseConfig, SimpleColumnIndexHeaderMap, ComplexColumnIndexHeaderMap, records);
                         }
                         return true;
                     }
@@ -148,21 +148,56 @@ public class CSVFileParserService : IFileParserService
     //     return false;
     // }
 
-    // public bool ProcessSimpleColumn(List<CSVRowModel> complexrows)
-    // {
-    //     return false;
-    // }
-    public bool SaveFile(Dictionary<int, string> SimpleColumns, Dictionary<int, string> ComplexColumns, List<CSVRowModel> data)
+    public string? ProcessSimpleColumn(string columnName, string complexColumnValue)
+    {
+        complexColumnValue = complexColumnValue.Replace(";", "");
+        var parts = complexColumnValue.Split('|');
+
+        foreach (var part in parts)
+        {
+            if (part.StartsWith($"{columnName}"))
+            {
+
+                return part.Substring(columnName.Length).Replace(":", "");
+            }
+
+        }
+        return null;
+    }
+    public bool SaveFile(ConfigModel configModel, Dictionary<int, string> SimpleColumns, Dictionary<int, string> ComplexColumns, List<CSVRowModel> data)
     {
         var records = new List<dynamic>();
-
+        // for (int i = 1; i < data.Count; i++)
+        // {
+        //     foreach (var c in ComplexColumns)
+        //     {
+        //         //Console.WriteLine(data[i].Row![c.Key]);
+        //         Console.WriteLine(ProcessSimpleColumn("PriceMultiplier", data[i].Row![c.Key]));
+        //     }
+        // }
+        Dictionary<int, string> CombinedColumns = [];
+        foreach (var column in SimpleColumns)
+        {
+            CombinedColumns[column.Key] = column.Value;
+        }
+        foreach (var column in ComplexColumns)
+        {
+            CombinedColumns[column.Key] = column.Value;
+        }
         for (int i = 1; i < data.Count; i++)
         {
             dynamic record = new ExpandoObject();
             var expandoDict = (IDictionary<string, object>)record;
-            foreach (var item in SimpleColumns)
+            foreach (var item in CombinedColumns)
             {
-                expandoDict[SimpleColumns[item.Key]] = data[i].Row![item.Key];
+                if (ComplexColumns.ContainsKey(item.Key))
+                {
+                    expandoDict[configModel.ComplexParamConfigs!.First(x => x.SourceColunn == CombinedColumns[item.Key]).DestinationColumnName!] = ProcessSimpleColumn(configModel.ComplexParamConfigs!.First(x => x.SourceColunn == CombinedColumns[item.Key]).ColumnToExtract!, data[i].Row![item.Key]) ?? "";// data[i].Row![item.Key];
+                }
+                else
+                {
+                    expandoDict[configModel.SimpleParamConfigs!.First(x => x.SourceColunn == CombinedColumns[item.Key]).DestinationColumnName!] = data[i].Row![item.Key];
+                }
             }
             records.Add(record);
         }
@@ -170,7 +205,6 @@ public class CSVFileParserService : IFileParserService
         //  _fileprocessor.ReadFromFile("", 2);
         return true;
     }
-
     public bool CopyFile(string bankName, string filepath)
     {
 

@@ -9,7 +9,7 @@
                     "DestinationColumnName": "ISIN"
                 },
                 {
-                    "SourceColunn": "CFICodeIN",
+                    "SourceColunn": "CFICode",
                     "DestinationColumnName": "CFICode"
                 },
                 {
@@ -19,10 +19,10 @@
             ],
             "ComplexParamConfigs": [
                 {
-                    "SourceColunn": "Notes",
+                    "SourceColunn": "AlgoParams",
                     "ColumnToExtract": "Price",
-                    "DestinationColumnName": "EffectivePrice",
-                    "delimiter": ","
+                    "DestinationColumnName": "PriceMultiplier",
+                    "delimiter": "|"
                 }
             ]
         }
