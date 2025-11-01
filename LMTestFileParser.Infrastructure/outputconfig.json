@@ -2,11 +2,19 @@
     "Configs": [
         {
             "BankName": "BarclaysBank",
-            "HeaderRowAt": 1,
+            "HeaderRowAt": 2,
             "SimpleParamConfigs": [
                 {
                     "SourceColunn": "ISIN",
                     "DestinationColumnName": "ISIN"
+                },
+                {
+                    "SourceColunn": "CFICodeIN",
+                    "DestinationColumnName": "CFICode"
+                },
+                {
+                    "SourceColunn": "Venue",
+                    "DestinationColumnName": "Venue"
                 }
             ],
             "ComplexParamConfigs": [

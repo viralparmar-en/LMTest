@@ -15,6 +15,6 @@ public interface IFileParserService
     List<string> GetHeaderListFromFile(string uploadedFilepath);
     ConfigModel GetConfigForABank(string bankName);
     List<string> GetMissingHeaders();
-    bool ProcessFile(string filepath);
+    bool ProcessFile(string bankName, string filepath);
     bool SaveFile();
 }

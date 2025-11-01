@@ -15,8 +15,11 @@ public class App
     public void Run()
     {
         //var configObject = _csvFileParserService.GetOutputHeaderListFromConfig("BarclaysBank");
-        var service = _csvFileParserService.CopyFile("Bank Of Baroda", "ofile.csv");
+        //  var service = _csvFileParserService.CopyFile("Bank Of Baroda", "ofile.csv");
         //Console.WriteLine(configObject.SimpleParamConfigs[0].SourceColunn);
+        // _csvFileParserService.SaveFile();
+        _csvFileParserService.ProcessFile("BarclaysBank", "DataExtractor_Example_Input.csv");
+        Console.WriteLine(_csvFileParserService._message);
         if (_args.Length > 0)
         {
             string filePath = _args[0];

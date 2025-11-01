@@ -1,5 +1,7 @@
 using System.Dynamic;
 using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using CsvHelper;
 using LMTestFileParser.Domain.Models;
 using LMTestFileParser.Infrastructure.Interface;
@@ -18,20 +20,52 @@ public class CSVFileProcessor : IFileProcessor
         File.Copy(source, destination);
         return true;
     }
-    public void ReadFromFile(string filePath)
+    public List<CSVRowModel> ReadFromFile(string filePath, int HeaderAt)
     {
-        string basePath = AppContext.BaseDirectory;
-        filePath = Path.Combine(basePath, "DataExtractor_Example_Input.csv");
-        var list = new List<CSVRowModel>();
-        using var reader = new StreamReader(filePath);
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-        while (csv.Read())
+        try
         {
-            var recordRead = csv.Parser.Record!.ToList();
-            list.Add(new CSVRowModel()
+            Console.WriteLine("Here");
+            string basePath = AppContext.BaseDirectory;
+
+            using var reader = new StreamReader("DataExtractor_Example_Input.csv");
+            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+            //Read until the header row is reached
+            for (int i = 0; i < HeaderAt; i++)
             {
-                Row = recordRead
-            });
+                csv.Read();
+            }
+
+            //Read the header ahd insert the header into first row of the list
+            csv.ReadHeader();
+            if (csv.Parser.Record != null)
+            {
+                var list = new List<CSVRowModel>
+                {
+                    new()
+                    {
+                        Row = [.. csv.Parser.Record]
+                    }
+                };
+                // Read the remaining subsequent rows and insert into list
+                while (csv.Read())
+                {
+
+                    var recordRead = csv.Parser.Record!.ToList();
+                    list.Add(new CSVRowModel()
+                    {
+                        Row = recordRead
+                    });
+                }
+                return list;
+            }
+            else
+            {
+                return [];
+            }
+        }
+        catch (Exception)
+        {
+            return [];
         }
     }
 
@@ -44,6 +78,7 @@ public class CSVFileProcessor : IFileProcessor
         using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
         {
             csv.WriteRecords(records);
+            writer.Flush();
             //Console.WriteLine(recordRead.ToString());
             // record.Id = 1;
             // record.Name = "one";

@@ -79,7 +79,7 @@ public class CSVFileParserService : IFileParserService
             }
             return false;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             _message = $"Something went wrong, check errlog.txt file for further details.";
             return false;
@@ -87,15 +87,65 @@ public class CSVFileParserService : IFileParserService
 
     }
 
-    public bool ProcessFile(string filepath)
+    public bool ProcessFile(string bankName, string filepath)
     {
-        _fileprocessor.ReadFromFile("");
-        return false;
+        try
+        {
+            if (!string.IsNullOrEmpty(bankName) && !string.IsNullOrEmpty(filepath) && IsValidFileType(filepath))
+            {
+                var parseConfig = GetConfigForABank(bankName);
+                if (parseConfig != null && !string.IsNullOrEmpty(parseConfig.BankName))
+                {
+                    if (CopyFile(bankName, filepath))
+                    {
+                        var records = _fileprocessor.ReadFromFile(_fileToProcess, parseConfig.HeaderRowAt);
+                        Dictionary<int, string> ColumnIndexHeaderMap = new Dictionary<int, string>();
+                        if (records != null)
+                        {
+                            if (parseConfig.SimpleParamConfigs != null && parseConfig.SimpleParamConfigs.Count > 0)
+                            {
+                                foreach (var sourcecolumn in parseConfig.SimpleParamConfigs)
+                                {
+                                    ColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(sourcecolumn.SourceColunn!), sourcecolumn.SourceColunn!);
+                                }
+                                Console.WriteLine(ColumnIndexHeaderMap.First().Key);
+                            }
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
+    // public bool ProcessComplexColumn(List<CSVRowModel> complexrows)
+    // {
+    //     return false;
+    // }
 
+    // public bool ProcessSimpleColumn(List<CSVRowModel> complexrows)
+    // {
+    //     return false;
+    // }
     public bool SaveFile()
     {
-        throw new NotImplementedException();
+        _fileprocessor.ReadFromFile("", 2);
+        return true;
     }
 
     public bool CopyFile(string bankName, string filepath)
