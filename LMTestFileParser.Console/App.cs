@@ -14,8 +14,8 @@ public class App
 
     public void Run()
     {
-        var configObject = _csvFileParserService.GetOutputHeaderListFromConfig("BarclaysBank");
-        var service = _csvFileParserService.ProcessData("");
+        //var configObject = _csvFileParserService.GetOutputHeaderListFromConfig("BarclaysBank");
+        var service = _csvFileParserService.CopyFile("Bank Of Baroda", "ofile.csv");
         //Console.WriteLine(configObject.SimpleParamConfigs[0].SourceColunn);
         if (_args.Length > 0)
         {

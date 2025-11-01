@@ -9,11 +9,12 @@ namespace LMTestFileParser.Application.Interface;
 public interface IFileParserService
 {
     string _message { get; set; }
-    bool IsValidFile(string filename);
-    bool Uploadile(string filepath);
+    bool IsValidFileType(string filename);
+    bool CopyFile(string bankName, string filepath);
+    bool UploadFile(string bankName, string filepath);
     List<string> GetHeaderListFromFile(string uploadedFilepath);
-    ConfigModel GetOutputHeaderListFromConfig(string bankName);
+    ConfigModel GetConfigForABank(string bankName);
     List<string> GetMissingHeaders();
-    bool ProcessData(string data);
+    bool ProcessFile(string filepath);
     bool SaveFile();
 }

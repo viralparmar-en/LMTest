@@ -13,6 +13,9 @@ public class CSVFileParserService : IFileParserService
 {
     private readonly IConfigReader _configReader;
     private readonly IFileProcessor _fileprocessor;
+    private string _fileToProcess { get; set; } = "";
+    private static readonly string basePath = AppContext.BaseDirectory;
+    public string _message { get; set; } = "";
     public CSVFileParserService(IConfigReader configReader, IFileProcessor fileprocessor)
     {
         _configReader = configReader;
@@ -24,7 +27,6 @@ public class CSVFileParserService : IFileParserService
         _fileprocessor = new CSVFileProcessor();
     }
 
-    public string _message { get; set; } = "";
 
     public List<string> GetHeaderListFromFile(string uploadedFilepath)
     {
@@ -36,36 +38,58 @@ public class CSVFileParserService : IFileParserService
         throw new NotImplementedException();
     }
 
-    public ConfigModel GetOutputHeaderListFromConfig(string bankName)
+    public ConfigModel GetConfigForABank(string bankName)
     {
         try
         {
-            return _configReader.GetConfigByBankName(bankName);
+            if (!string.IsNullOrEmpty(bankName))
+            {
+                return _configReader.GetConfigByBankName(bankName);
+            }
+            else
+            {
+                _message = "Bank name not provided for retreiving config details.";
+                return new();
+            }
         }
         catch (Exception ex)
         {
+            _message = "Something went wrong while fetching config data for bank. Please check error.txt for more details";
             Console.WriteLine(ex.ToString());
             return new();
         }
     }
 
-    public bool IsValidFile(string filename)
+    public bool IsValidFileType(string filename)
     {
         try
         {
-            var extension = Path.GetExtension(filename);
-            return true;
+            if (!string.IsNullOrEmpty(filename))
+            {
+                var extension = Path.GetExtension(filename);
+                if (extension.Equals(".csv"))
+                {
+                    return true;
+                }
+                else
+                {
+                    _message = "Invalid file type, the file should be of type .csv";
+                    return false;
+                }
+            }
+            return false;
         }
-        catch
+        catch (Exception ex)
         {
+            _message = $"Something went wrong, check errlog.txt file for further details.";
             return false;
         }
 
     }
 
-    public bool ProcessData(string data)
+    public bool ProcessFile(string filepath)
     {
-        _fileprocessor.ReadFromFile();
+        _fileprocessor.ReadFromFile("");
         return false;
     }
 
@@ -74,7 +98,41 @@ public class CSVFileParserService : IFileParserService
         throw new NotImplementedException();
     }
 
-    public bool Uploadile(string filepath)
+    public bool CopyFile(string bankName, string filepath)
+    {
+
+        try
+        {
+            if (!string.IsNullOrEmpty(bankName) && IsValidFileType(filepath))
+            {
+                bankName = bankName.ToLower().Replace(" ", "");
+                string bankFolder = Path.Combine(basePath, $"RawBankFiles\\{bankName}"); // Change this to your desired folder
+                string newfileName = $"{bankName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+                _fileToProcess = newfileName;
+                string desitnationfullPath = Path.Combine(bankFolder, _fileToProcess);
+                if (_fileprocessor.SaveUploadedFile(bankFolder, filepath, desitnationfullPath))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                _message = $"Bank name and file path are required. {_message}";
+                return false;
+            }
+        }
+        catch (Exception)
+        {
+            _message = "There is some error processing the file, see the errorlog.txt for further details";
+            return false;
+        }
+    }
+
+    public bool UploadFile(string bankName, string filepath)
     {
         throw new NotImplementedException();
     }

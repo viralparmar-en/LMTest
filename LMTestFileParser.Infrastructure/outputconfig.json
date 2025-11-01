@@ -2,6 +2,7 @@
     "Configs": [
         {
             "BankName": "BarclaysBank",
+            "HeaderRowAt": 1,
             "SimpleParamConfigs": [
                 {
                     "SourceColunn": "ISIN",
@@ -12,7 +13,8 @@
                 {
                     "SourceColunn": "Notes",
                     "ColumnToExtract": "Price",
-                    "DestinationColumnName": "EffectivePrice"
+                    "DestinationColumnName": "EffectivePrice",
+                    "delimiter": ","
                 }
             ]
         }
