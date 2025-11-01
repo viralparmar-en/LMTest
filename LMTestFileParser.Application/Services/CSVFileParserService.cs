@@ -1,4 +1,5 @@
-﻿using LMTestFileParser.Application.Interface;
+﻿using System.Dynamic;
+using LMTestFileParser.Application.Interface;
 using LMTestFileParser.Domain.Models;
 using LMTestFileParser.Infrastructure;
 using LMTestFileParser.Infrastructure.Interface;
@@ -99,17 +100,25 @@ public class CSVFileParserService : IFileParserService
                     if (CopyFile(bankName, filepath))
                     {
                         var records = _fileprocessor.ReadFromFile(_fileToProcess, parseConfig.HeaderRowAt);
-                        Dictionary<int, string> ColumnIndexHeaderMap = new Dictionary<int, string>();
+                        Dictionary<int, string> SimpleColumnIndexHeaderMap = new Dictionary<int, string>();
+                        Dictionary<int, string> ComplexColumnIndexHeaderMap = new Dictionary<int, string>();
                         if (records != null)
                         {
                             if (parseConfig.SimpleParamConfigs != null && parseConfig.SimpleParamConfigs.Count > 0)
                             {
-                                foreach (var sourcecolumn in parseConfig.SimpleParamConfigs)
+                                foreach (var source in parseConfig.SimpleParamConfigs)
                                 {
-                                    ColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(sourcecolumn.SourceColunn!), sourcecolumn.SourceColunn!);
+                                    SimpleColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(source.SourceColunn!), source.SourceColunn!);
                                 }
-                                Console.WriteLine(ColumnIndexHeaderMap.First().Key);
                             }
+                            if (parseConfig.ComplexParamConfigs != null && parseConfig.ComplexParamConfigs.Count > 0)
+                            {
+                                foreach (var source in parseConfig.ComplexParamConfigs)
+                                {
+                                    ComplexColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(source.SourceColunn!), source.SourceColunn!);
+                                }
+                            }
+                            SaveFile(SimpleColumnIndexHeaderMap, ComplexColumnIndexHeaderMap, records);
                         }
                         return true;
                     }
@@ -128,8 +137,9 @@ public class CSVFileParserService : IFileParserService
                 return false;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
             return false;
         }
     }
@@ -142,9 +152,22 @@ public class CSVFileParserService : IFileParserService
     // {
     //     return false;
     // }
-    public bool SaveFile()
+    public bool SaveFile(Dictionary<int, string> SimpleColumns, Dictionary<int, string> ComplexColumns, List<CSVRowModel> data)
     {
-        _fileprocessor.ReadFromFile("", 2);
+        var records = new List<dynamic>();
+
+        for (int i = 1; i < data.Count; i++)
+        {
+            dynamic record = new ExpandoObject();
+            var expandoDict = (IDictionary<string, object>)record;
+            foreach (var item in SimpleColumns)
+            {
+                expandoDict[SimpleColumns[item.Key]] = data[i].Row![item.Key];
+            }
+            records.Add(record);
+        }
+        _fileprocessor.WriteToFile(records);
+        //  _fileprocessor.ReadFromFile("", 2);
         return true;
     }
 
@@ -181,7 +204,6 @@ public class CSVFileParserService : IFileParserService
             return false;
         }
     }
-
     public bool UploadFile(string bankName, string filepath)
     {
         throw new NotImplementedException();

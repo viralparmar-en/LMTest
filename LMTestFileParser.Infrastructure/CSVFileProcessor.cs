@@ -69,22 +69,20 @@ public class CSVFileProcessor : IFileProcessor
         }
     }
 
-    public void WriteToFile(string filePath)
+    public void WriteToFile(List<dynamic> records)
     {
         string basePath = AppContext.BaseDirectory;
-        var records = new List<dynamic>();
-        dynamic record = new ExpandoObject();
-        using (var writer = new StreamWriter(Path.Combine(basePath, "ofile.csv")))
-        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-        {
-            csv.WriteRecords(records);
-            writer.Flush();
-            //Console.WriteLine(recordRead.ToString());
-            // record.Id = 1;
-            // record.Name = "one";
-            //records.Add(recordRead);
-            // Do something with the record.
-            // writer.ToString();
-        }
+        // var records = new List<dynamic>();
+        // dynamic record = new ExpandoObject();
+        using var writer = new StreamWriter(Path.Combine(basePath, "ofile.csv"));
+        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        csv.WriteRecords(records);
+        writer.Flush();
+        //Console.WriteLine(recordRead.ToString());
+        // record.Id = 1;
+        // record.Name = "one";
+        //records.Add(recordRead);
+        // Do something with the record.
+        // writer.ToString();
     }
 }
