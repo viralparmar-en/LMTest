@@ -15,14 +15,24 @@
                 {
                     "SourceColunn": "Venue",
                     "DestinationColumnName": "Venue"
+                },
+                {
+                    "SourceColunn": "OrderRef",
+                    "DestinationColumnName": "OrderRef"
                 }
             ],
             "ComplexParamConfigs": [
                 {
                     "SourceColunn": "AlgoParams",
-                    "ColumnToExtract": "Price",
-                    "DestinationColumnName": "PriceMultiplier",
-                    "delimiter": "|"
+                    "ColumnToExtract": "InstFullName",
+                    "DestinationColumnName": "InstFullName",
+                    "Delimiter": "|"
+                },
+                {
+                    "SourceColunn": "AlgoParams",
+                    "ColumnToExtract": "PriceMultiplier",
+                    "DestinationColumnName": "ContractSize",
+                    "Delimiter": "|"
                 }
             ]
         }

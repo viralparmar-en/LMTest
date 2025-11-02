@@ -6,10 +6,6 @@ using LMTestFileParser.Infrastructure.Interface;
 
 namespace LMTestFileParser.Application.Services;
 
-// Check if valid Bank name and is provided
-// Check if valid file and is of type csv
-// Get the column names of the file uploaded
-// Parse the json file with bank names and column names for each bank
 public class CSVFileParserService : IFileParserService
 {
     private readonly IConfigReader _configReader;
@@ -27,18 +23,46 @@ public class CSVFileParserService : IFileParserService
         _configReader = new JsonConfigReader();
         _fileprocessor = new CSVFileProcessor();
     }
-
-
-    public List<string> GetHeaderListFromFile(string uploadedFilepath)
+    public ConfigModel GetHeaderIndexMap(ConfigModel parseConfig, List<CSVRowModel> records)
     {
-        throw new NotImplementedException();
+        if (records != null)
+        {
+            if (parseConfig.SimpleParamConfigs != null && parseConfig.SimpleParamConfigs.Count > 0)
+            {
+                foreach (var source in parseConfig.SimpleParamConfigs)
+                {
+                    var result = parseConfig.SimpleParamConfigs.Where(x => x.SourceColunn == source.SourceColunn!);
+                    if (result != null)
+                    {
+                        foreach (var item in result)
+                        {
+                            item.SourceIndex = records[0].Row!.IndexOf(source.SourceColunn!);
+                        }
+                    }
+                    //SimpleColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(source.SourceColunn!), source.SourceColunn!);
+                }
+            }
+            if (parseConfig.ComplexParamConfigs != null && parseConfig.ComplexParamConfigs.Count > 0)
+            {
+                foreach (var source in parseConfig.ComplexParamConfigs)
+                {
+                    var result = parseConfig.ComplexParamConfigs.Where(x => x.SourceColunn == source.SourceColunn!);
+                    if (result != null)
+                    {
+                        foreach (var item in result)
+                        {
+                            item.SourceIndex = records[0].Row!.IndexOf(source.SourceColunn!);
+                        }
+                    }
+                }
+            }
+        }
+        return parseConfig;
     }
-
     public List<string> GetMissingHeaders()
     {
         throw new NotImplementedException();
     }
-
     public ConfigModel GetConfigForABank(string bankName)
     {
         try
@@ -60,7 +84,6 @@ public class CSVFileParserService : IFileParserService
             return new();
         }
     }
-
     public bool IsValidFileType(string filename)
     {
         try
@@ -87,7 +110,6 @@ public class CSVFileParserService : IFileParserService
         }
 
     }
-
     public bool ProcessFile(string bankName, string filepath)
     {
         try
@@ -100,25 +122,11 @@ public class CSVFileParserService : IFileParserService
                     if (CopyFile(bankName, filepath))
                     {
                         var records = _fileprocessor.ReadFromFile(_fileToProcess, parseConfig.HeaderRowAt);
-                        Dictionary<int, string> SimpleColumnIndexHeaderMap = new Dictionary<int, string>();
-                        Dictionary<int, string> ComplexColumnIndexHeaderMap = new Dictionary<int, string>();
+
                         if (records != null)
                         {
-                            if (parseConfig.SimpleParamConfigs != null && parseConfig.SimpleParamConfigs.Count > 0)
-                            {
-                                foreach (var source in parseConfig.SimpleParamConfigs)
-                                {
-                                    SimpleColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(source.SourceColunn!), source.SourceColunn!);
-                                }
-                            }
-                            if (parseConfig.ComplexParamConfigs != null && parseConfig.ComplexParamConfigs.Count > 0)
-                            {
-                                foreach (var source in parseConfig.ComplexParamConfigs)
-                                {
-                                    ComplexColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(source.SourceColunn!), source.SourceColunn!);
-                                }
-                            }
-                            SaveFile(parseConfig, SimpleColumnIndexHeaderMap, ComplexColumnIndexHeaderMap, records);
+                            parseConfig = GetHeaderIndexMap(parseConfig, records);
+                            SaveFile(parseConfig, records);
                         }
                         return true;
                     }
@@ -143,61 +151,55 @@ public class CSVFileParserService : IFileParserService
             return false;
         }
     }
-    // public bool ProcessComplexColumn(List<CSVRowModel> complexrows)
-    // {
-    //     return false;
-    // }
-
-    public string? ProcessSimpleColumn(string columnName, string complexColumnValue)
+    public string? ProcessComplexColumn(string columnNameToExtract, string complexColumnValue, char delimiter)
     {
         complexColumnValue = complexColumnValue.Replace(";", "");
-        var parts = complexColumnValue.Split('|');
+        var parts = complexColumnValue.Split(delimiter);
 
         foreach (var part in parts)
         {
-            if (part.StartsWith($"{columnName}"))
+            if (part.StartsWith($"{columnNameToExtract}"))
             {
 
-                return part.Substring(columnName.Length).Replace(":", "");
+                return part.Substring(columnNameToExtract.Length).Replace(":", "");
             }
 
         }
         return null;
     }
-    public bool SaveFile(ConfigModel configModel, Dictionary<int, string> SimpleColumns, Dictionary<int, string> ComplexColumns, List<CSVRowModel> data)
+    public bool SaveFile(ConfigModel configModel, List<CSVRowModel> data)
     {
         var records = new List<dynamic>();
-        // for (int i = 1; i < data.Count; i++)
+
+        // Dictionary<int, string> CombinedColumns = [];
+        // foreach (var column in SimpleColumns)
         // {
-        //     foreach (var c in ComplexColumns)
-        //     {
-        //         //Console.WriteLine(data[i].Row![c.Key]);
-        //         Console.WriteLine(ProcessSimpleColumn("PriceMultiplier", data[i].Row![c.Key]));
-        //     }
+        //     CombinedColumns[column.Key] = column.Value;
         // }
-        Dictionary<int, string> CombinedColumns = [];
-        foreach (var column in SimpleColumns)
-        {
-            CombinedColumns[column.Key] = column.Value;
-        }
-        foreach (var column in ComplexColumns)
-        {
-            CombinedColumns[column.Key] = column.Value;
-        }
+        // foreach (var column in ComplexColumns)
+        // {
+        //     CombinedColumns[column.Key] = column.Value;
+        // }
         for (int i = 1; i < data.Count; i++)
         {
             dynamic record = new ExpandoObject();
             var expandoDict = (IDictionary<string, object>)record;
-            foreach (var item in CombinedColumns)
+
+            if (configModel.SimpleParamConfigs != null)
             {
-                if (ComplexColumns.ContainsKey(item.Key))
+                foreach (var item in configModel.SimpleParamConfigs)
                 {
-                    expandoDict[configModel.ComplexParamConfigs!.First(x => x.SourceColunn == CombinedColumns[item.Key]).DestinationColumnName!] = ProcessSimpleColumn(configModel.ComplexParamConfigs!.First(x => x.SourceColunn == CombinedColumns[item.Key]).ColumnToExtract!, data[i].Row![item.Key]) ?? "";// data[i].Row![item.Key];
+                    expandoDict[configModel.SimpleParamConfigs!.First(x => x.SourceColunn == item.SourceColunn).DestinationColumnName!] = data[i].Row![item.SourceIndex];
                 }
-                else
+            }
+            if (configModel.ComplexParamConfigs != null)
+            {
+                foreach (var item in configModel.ComplexParamConfigs)
                 {
-                    expandoDict[configModel.SimpleParamConfigs!.First(x => x.SourceColunn == CombinedColumns[item.Key]).DestinationColumnName!] = data[i].Row![item.Key];
+                    Console.WriteLine(item.ColumnToExtract);
+                    expandoDict[configModel.ComplexParamConfigs.First(x => x.ColumnToExtract == item.ColumnToExtract).DestinationColumnName!] = ProcessComplexColumn(configModel.ComplexParamConfigs.First(x => x.ColumnToExtract == item.ColumnToExtract).ColumnToExtract!, data[i].Row![item.SourceIndex], '|') ?? "";
                 }
+
             }
             records.Add(record);
         }

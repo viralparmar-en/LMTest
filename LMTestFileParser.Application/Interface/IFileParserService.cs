@@ -12,10 +12,10 @@ public interface IFileParserService
     bool IsValidFileType(string filename);
     bool CopyFile(string bankName, string filepath);
     bool UploadFile(string bankName, string filepath);
-    List<string> GetHeaderListFromFile(string uploadedFilepath);
+    ConfigModel GetHeaderIndexMap(ConfigModel parseConfig, List<CSVRowModel> records);
     ConfigModel GetConfigForABank(string bankName);
     List<string> GetMissingHeaders();
     bool ProcessFile(string bankName, string filepath);
-    bool SaveFile(ConfigModel model, Dictionary<int, string> SimpleColumns, Dictionary<int, string> ComplexColumns, List<CSVRowModel> data);
-
+    string? ProcessComplexColumn(string columnName, string complexColumnValue, char delimiter);
+    bool SaveFile(ConfigModel configModel, List<CSVRowModel> data);
 }
