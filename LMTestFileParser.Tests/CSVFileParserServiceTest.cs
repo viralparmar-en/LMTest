@@ -1,6 +1,7 @@
 using System.Globalization;
 using LMTestFileParser.Application.Interface;
 using LMTestFileParser.Application.Services;
+using LMTestFileParser.Domain.Models;
 using LMTestFileParser.Infrastructure.Interface;
 using LMTestFileParser.Tests.Mocks;
 
@@ -42,18 +43,18 @@ public class CSVFileParserServiceTest
         Assert.Equal(result, _result);
     }
 
-    // [Theory]
-    // [InlineData("", "", '|', "")]
-    // [InlineData("", "", '|', "")]
-    // [InlineData("", "barclays", '|', "")]
-    // [InlineData("", "", '|', "")]
-    // [InlineData("", "barclays", '|', "")]
-    // public void ProcessComplexColumn_ExtractsDesiredColumnFromTheString_returnsString(string columnNameToExtract, string complexColumnValue, char delimiter, string result)
-    // {
-    //     var _result = _fileParserService.ProcessComplexColumn(columnNameToExtract, complexColumnValue, delimiter);
+    [Theory]
+    [InlineData("", "barclays", "|", null)]
+    [InlineData("PriceMultiplier", "", "|", null)]
+    [InlineData("PriceMultiplier", "barclays", "", null)]
+    [InlineData("PriceMultiplier", "InstIdentCode:DE000C4SA5W8|;InstFullName:DAX|;InstClassification:FFICSX|;NotionalCurr:EUR|;PriceMultiplier:25.0|;UnderlInstCode:DE0008469008|;UnderlIndexName:DAX PERFORMANCE-INDEX|;OptionType:OTHR|;StrikePrice:0.0|;OptionExerciseStyle:|;ExpiryDate:2020-09-18|;DeliveryType:PHYS|", "|;", "25.0")]
+    public void ProcessComplexColumn_ExtractsDesiredColumnFromTheString_returnsString(string columnNameToExtract, string complexColumnValue, string delimiter, string result)
+    {
+        var _result = _fileParserService.ProcessComplexColumn(columnNameToExtract, complexColumnValue, delimiter);
 
-    //     Assert.IsType<CSVFileParserService>(_fileParserService);
-    //     Assert.Equal(result, _result);
-    // }
+        Assert.IsType<CSVFileParserService>(_fileParserService);
+        Assert.Equal(result, _result);
+    }
+
 
 }

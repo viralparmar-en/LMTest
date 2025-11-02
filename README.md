@@ -16,34 +16,34 @@ git clone https://github.com/viralparmar-en/LMTest.git
 
 ###  2. Navigate to the Solution Folder
 ```bash 
-cd LMTestShow 
+cd LMTest 
 ```
 ### 3. Build the Solution
 ```bash
-dotnet buildShow 
+dotnet build 
 ```
 
-Once the build is successful, proceed to the console application folder:
+### 4. Once the build is successful, proceed to the console application folder:
 ```bash
-cd LMTestFileParser.ConsoleShow 
+cd LMTestFileParser.Console 
 ```
-### 4. Publish the Console Application
+### 5. Publish the Console Application
 ```bash
-dotnet publishShow 
+dotnet publish 
 ```
 
-### 5. Run the Application
+### 6. Run the Application
 Navigate to the published output folder:
 ```bash
-cd bin/Release/netX.X/publishShow 
+cd bin/Release/netX.X/publish 
 ```
 
 Replace netX.X with your target framework version (e.g., net6.0, net7.0).
 
-### 6. Run the application with the following command:
+### 7. Run the application with the following command:
 
 ```bash
-LMTestFileParser.Console.exe <BankName> <Filepath.csv>Show 
+LMTestFileParser.Console.exe <BankName> <Filepath.csv> 
 ```
 📁 Output
 The parsed output file will be created in:

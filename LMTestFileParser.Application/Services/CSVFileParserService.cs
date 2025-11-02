@@ -140,7 +140,11 @@ public class CSVFileParserService : IFileParserService
     }
     public string? ProcessComplexColumn(string columnNameToExtract, string complexColumnValue, string delimiter)
     {
-
+        if (string.IsNullOrEmpty(columnNameToExtract) || string.IsNullOrEmpty(complexColumnValue) || string.IsNullOrEmpty(delimiter))
+        {
+            _message = "There was an error extracting column from complex field.";
+            return null;
+        }
         var parts = complexColumnValue.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts)
         {
