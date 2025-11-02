@@ -16,6 +16,6 @@ public interface IFileParserService
     ConfigModel GetConfigForABank(string bankName);
     List<string> GetMissingHeaders();
     bool ProcessFile(string bankName, string filepath);
-    string? ProcessComplexColumn(string columnName, string complexColumnValue, char delimiter);
+    string? ProcessComplexColumn(string columnName, string complexColumnValue, string delimiter);
     bool SaveFile(ConfigModel configModel, List<CSVRowModel> data);
 }

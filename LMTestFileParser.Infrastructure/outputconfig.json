@@ -26,19 +26,61 @@
                     "SourceColunn": "AlgoParams",
                     "ColumnToExtract": "InstFullName",
                     "DestinationColumnName": "InstFullName",
-                    "Delimiter": "|"
+                    "Delimiter": "|;"
                 },
                 {
                     "SourceColunn": "AlgoParams",
                     "ColumnToExtract": "PriceMultiplier",
                     "DestinationColumnName": "ContractSize",
-                    "Delimiter": "|"
+                    "Delimiter": "|;"
                 },
                 {
                     "SourceColunn": "AlgoParams",
                     "ColumnToExtract": "UnderlInstCode",
                     "DestinationColumnName": "UnderlInstCode",
-                    "Delimiter": "|"
+                    "Delimiter": "|;"
+                }
+            ]
+        },
+        {
+            "BankName": "BankOfBaroda",
+            "HeaderRowAt": 2,
+            "SimpleParamConfigs": [
+                {
+                    "SourceColunn": "ISIN",
+                    "DestinationColumnName": "ISIN"
+                },
+                {
+                    "SourceColunn": "CFICode",
+                    "DestinationColumnName": "CFICode"
+                },
+                {
+                    "SourceColunn": "Venue",
+                    "DestinationColumnName": "Venue"
+                },
+                {
+                    "SourceColunn": "OrderRef",
+                    "DestinationColumnName": "OrderRef"
+                }
+            ],
+            "ComplexParamConfigs": [
+                {
+                    "SourceColunn": "AlgoParams",
+                    "ColumnToExtract": "InstFullName",
+                    "DestinationColumnName": "InstFullName",
+                    "Delimiter": "|;"
+                },
+                {
+                    "SourceColunn": "AlgoParams",
+                    "ColumnToExtract": "PriceMultiplier",
+                    "DestinationColumnName": "ContractSize",
+                    "Delimiter": "|;"
+                },
+                {
+                    "SourceColunn": "AlgoParams",
+                    "ColumnToExtract": "UnderlInstCode",
+                    "DestinationColumnName": "UnderlInstCode",
+                    "Delimiter": "|;"
                 }
             ]
         }

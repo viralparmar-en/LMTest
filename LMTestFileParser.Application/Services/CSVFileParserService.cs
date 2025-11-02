@@ -138,21 +138,20 @@ public class CSVFileParserService : IFileParserService
             return false;
         }
     }
-    public string? ProcessComplexColumn(string columnNameToExtract, string complexColumnValue, char delimiter)
+    public string? ProcessComplexColumn(string columnNameToExtract, string complexColumnValue, string delimiter)
     {
-        complexColumnValue = complexColumnValue.Replace(";", "");
-        var parts = complexColumnValue.Split(delimiter);
 
+        var parts = complexColumnValue.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts)
         {
-            if (part.StartsWith($"{columnNameToExtract}"))
+            var keyValue = part.Split(':', 2);
+            if (keyValue.Length == 2 && keyValue[0] == columnNameToExtract)
             {
-
-                return part.Substring(columnNameToExtract.Length).Replace(":", "");
+                return keyValue[1];
             }
-
         }
         return null;
+
     }
     public bool SaveFile(ConfigModel configModel, List<CSVRowModel> data)
     {
@@ -184,7 +183,7 @@ public class CSVFileParserService : IFileParserService
             {
                 foreach (var item in configModel.ComplexParamConfigs)
                 {
-                    if (!string.IsNullOrEmpty(item.DestinationColumnName) && item.SourceIndex >= 0 && item.SourceIndex < row.Count)
+                    if (!string.IsNullOrEmpty(item.DestinationColumnName) && !string.IsNullOrEmpty(item.Delimiter) && item.SourceIndex >= 0 && item.SourceIndex < row.Count)
                     {
                         expandoDict[item.DestinationColumnName] = ProcessComplexColumn(item.ColumnToExtract!, row[item.SourceIndex], item.Delimiter) ?? "";
                     }
