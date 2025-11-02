@@ -25,34 +25,33 @@ public class CSVFileParserService : IFileParserService
     }
     public ConfigModel GetHeaderIndexMap(ConfigModel parseConfig, List<CSVRowModel> records)
     {
-        if (records != null)
+        if (records == null || records.Count == 0 || records[0].Row == null)
+            return parseConfig;
+
+        var headerRow = records[0].Row;
+
+        if (headerRow != null)
         {
-            if (parseConfig.SimpleParamConfigs != null && parseConfig.SimpleParamConfigs.Count > 0)
+            // Process SimpleParamConfigs
+            if (parseConfig.SimpleParamConfigs != null)
             {
-                foreach (var source in parseConfig.SimpleParamConfigs)
+                foreach (var item in parseConfig.SimpleParamConfigs)
                 {
-                    var result = parseConfig.SimpleParamConfigs.Where(x => x.SourceColunn == source.SourceColunn!);
-                    if (result != null)
+                    if (!string.IsNullOrEmpty(item.SourceColunn))
                     {
-                        foreach (var item in result)
-                        {
-                            item.SourceIndex = records[0].Row!.IndexOf(source.SourceColunn!);
-                        }
+                        item.SourceIndex = headerRow.IndexOf(item.SourceColunn);
                     }
-                    //SimpleColumnIndexHeaderMap.Add(records[0].Row!.IndexOf(source.SourceColunn!), source.SourceColunn!);
                 }
             }
-            if (parseConfig.ComplexParamConfigs != null && parseConfig.ComplexParamConfigs.Count > 0)
+
+            // Process ComplexParamConfigs
+            if (parseConfig.ComplexParamConfigs != null)
             {
-                foreach (var source in parseConfig.ComplexParamConfigs)
+                foreach (var item in parseConfig.ComplexParamConfigs)
                 {
-                    var result = parseConfig.ComplexParamConfigs.Where(x => x.SourceColunn == source.SourceColunn!);
-                    if (result != null)
+                    if (!string.IsNullOrEmpty(item.SourceColunn))
                     {
-                        foreach (var item in result)
-                        {
-                            item.SourceIndex = records[0].Row!.IndexOf(source.SourceColunn!);
-                        }
+                        item.SourceIndex = headerRow.IndexOf(item.SourceColunn);
                     }
                 }
             }
@@ -79,7 +78,7 @@ public class CSVFileParserService : IFileParserService
         }
         catch (Exception ex)
         {
-            _message = "Something went wrong while fetching config data for bank. Please check error.txt for more details";
+            _message = $"Something went wrong while fetching config data for bank. {ex}";
             Console.WriteLine(ex.ToString());
             return new();
         }
@@ -103,9 +102,9 @@ public class CSVFileParserService : IFileParserService
             }
             return false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _message = $"Something went wrong, check errlog.txt file for further details.";
+            _message = $"Something went wrong while validating file type, {ex}";
             return false;
         }
 
@@ -114,40 +113,28 @@ public class CSVFileParserService : IFileParserService
     {
         try
         {
-            if (!string.IsNullOrEmpty(bankName) && !string.IsNullOrEmpty(filepath) && IsValidFileType(filepath))
-            {
-                var parseConfig = GetConfigForABank(bankName);
-                if (parseConfig != null && !string.IsNullOrEmpty(parseConfig.BankName))
-                {
-                    if (CopyFile(bankName, filepath))
-                    {
-                        var records = _fileprocessor.ReadFromFile(_fileToProcess, parseConfig.HeaderRowAt);
-
-                        if (records != null)
-                        {
-                            parseConfig = GetHeaderIndexMap(parseConfig, records);
-                            SaveFile(parseConfig, records);
-                        }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
+            if (string.IsNullOrEmpty(bankName) || string.IsNullOrEmpty(filepath) || !IsValidFileType(filepath))
                 return false;
-            }
+
+            var parseConfig = GetConfigForABank(bankName);
+            if (parseConfig == null || string.IsNullOrEmpty(parseConfig.BankName))
+                return false;
+
+            if (!CopyFile(bankName, filepath))
+                return false;
+
+            var records = _fileprocessor.ReadFromFile(_fileToProcess, parseConfig.HeaderRowAt);
+            if (records == null)
+                return false;
+
+            parseConfig = GetHeaderIndexMap(parseConfig, records);
+            SaveFile(parseConfig, records);
+
+            return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Console.WriteLine(ex);
             return false;
         }
     }
@@ -170,73 +157,67 @@ public class CSVFileParserService : IFileParserService
     public bool SaveFile(ConfigModel configModel, List<CSVRowModel> data)
     {
         var records = new List<dynamic>();
-
-        // Dictionary<int, string> CombinedColumns = [];
-        // foreach (var column in SimpleColumns)
-        // {
-        //     CombinedColumns[column.Key] = column.Value;
-        // }
-        // foreach (var column in ComplexColumns)
-        // {
-        //     CombinedColumns[column.Key] = column.Value;
-        // }
+        if (configModel == null || string.IsNullOrEmpty(configModel.BankName) || data.Count == 0)
+            return false;
         for (int i = 1; i < data.Count; i++)
         {
             dynamic record = new ExpandoObject();
             var expandoDict = (IDictionary<string, object>)record;
+            var row = data[i].Row;
 
+            if (row == null) continue;
+
+            // Process Simple Parameters
             if (configModel.SimpleParamConfigs != null)
             {
                 foreach (var item in configModel.SimpleParamConfigs)
                 {
-                    expandoDict[configModel.SimpleParamConfigs!.First(x => x.SourceColunn == item.SourceColunn).DestinationColumnName!] = data[i].Row![item.SourceIndex];
+                    if (!string.IsNullOrEmpty(item.DestinationColumnName) && item.SourceIndex >= 0 && item.SourceIndex < row.Count)
+                    {
+                        expandoDict[item.DestinationColumnName] = row[item.SourceIndex];
+                    }
                 }
             }
+
+            // Process Complex Parameters
             if (configModel.ComplexParamConfigs != null)
             {
                 foreach (var item in configModel.ComplexParamConfigs)
                 {
-                    Console.WriteLine(item.ColumnToExtract);
-                    expandoDict[configModel.ComplexParamConfigs.First(x => x.ColumnToExtract == item.ColumnToExtract).DestinationColumnName!] = ProcessComplexColumn(configModel.ComplexParamConfigs.First(x => x.ColumnToExtract == item.ColumnToExtract).ColumnToExtract!, data[i].Row![item.SourceIndex], '|') ?? "";
+                    if (!string.IsNullOrEmpty(item.DestinationColumnName) && item.SourceIndex >= 0 && item.SourceIndex < row.Count)
+                    {
+                        expandoDict[item.DestinationColumnName] = ProcessComplexColumn(item.ColumnToExtract!, row[item.SourceIndex], item.Delimiter) ?? "";
+                    }
                 }
-
             }
+
             records.Add(record);
         }
-        _fileprocessor.WriteToFile(records);
-        //  _fileprocessor.ReadFromFile("", 2);
+
+        _fileprocessor.WriteToFile(configModel.BankName, records);
         return true;
     }
     public bool CopyFile(string bankName, string filepath)
     {
-
         try
         {
-            if (!string.IsNullOrEmpty(bankName) && IsValidFileType(filepath))
+            if (string.IsNullOrEmpty(bankName) || !IsValidFileType(filepath))
             {
-                bankName = bankName.ToLower().Replace(" ", "");
-                string bankFolder = Path.Combine(basePath, $"RawBankFiles\\{bankName}"); // Change this to your desired folder
-                string newfileName = $"{bankName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
-                _fileToProcess = newfileName;
-                string desitnationfullPath = Path.Combine(bankFolder, _fileToProcess);
-                if (_fileprocessor.SaveUploadedFile(bankFolder, filepath, desitnationfullPath))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                _message = $"Bank name and file path are required. {_message}";
+                _message = $"Bank name and valid file path are required. {_message}";
                 return false;
             }
+
+            var sanitizedBankName = bankName.ToLower().Replace(" ", "");
+            var bankFolder = Path.Combine(basePath, "RawBankFiles", sanitizedBankName);
+            var newFileName = $"{sanitizedBankName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+
+            var destinationFullPath = Path.Combine(bankFolder, newFileName);
+            _fileToProcess = destinationFullPath;
+            return _fileprocessor.SaveUploadedFile(bankFolder, filepath, destinationFullPath);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _message = "There is some error processing the file, see the errorlog.txt for further details";
+            _message = $"There was an error copying the file. {ex}.";
             return false;
         }
     }

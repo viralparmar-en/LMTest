@@ -33,6 +33,12 @@
                     "ColumnToExtract": "PriceMultiplier",
                     "DestinationColumnName": "ContractSize",
                     "Delimiter": "|"
+                },
+                {
+                    "SourceColunn": "AlgoParams",
+                    "ColumnToExtract": "UnderlInstCode",
+                    "DestinationColumnName": "UnderlInstCode",
+                    "Delimiter": "|"
                 }
             ]
         }

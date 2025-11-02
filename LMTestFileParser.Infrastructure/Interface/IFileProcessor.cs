@@ -6,5 +6,5 @@ public interface IFileProcessor
 {
     bool SaveUploadedFile(string bankFolder, string filePath, string folderPath);
     List<CSVRowModel> ReadFromFile(string filePath, int HeaderAt);
-    void WriteToFile(List<dynamic> records);
+    void WriteToFile(string bankName, List<dynamic> records);
 }

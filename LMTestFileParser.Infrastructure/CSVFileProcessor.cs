@@ -24,10 +24,9 @@ public class CSVFileProcessor : IFileProcessor
     {
         try
         {
-            Console.WriteLine("Here");
             string basePath = AppContext.BaseDirectory;
-
-            using var reader = new StreamReader("DataExtractor_Example_Input.csv");
+            Console.WriteLine(filePath);
+            using var reader = new StreamReader(filePath);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
             //Read until the header row is reached
             for (int i = 0; i < HeaderAt; i++)
@@ -69,20 +68,18 @@ public class CSVFileProcessor : IFileProcessor
         }
     }
 
-    public void WriteToFile(List<dynamic> records)
+    public void WriteToFile(string bankName, List<dynamic> records)
     {
+        var outputDirectory = Path.Combine("OutputFiles", bankName);
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
         string basePath = AppContext.BaseDirectory;
-        // var records = new List<dynamic>();
-        // dynamic record = new ExpandoObject();
-        using var writer = new StreamWriter(Path.Combine(basePath, "ofile.csv"));
+        using var writer = new StreamWriter(Path.Combine(basePath, outputDirectory, $"{bankName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv"));
         using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csv.WriteRecords(records);
         writer.Flush();
-        //Console.WriteLine(recordRead.ToString());
-        // record.Id = 1;
-        // record.Name = "one";
-        //records.Add(recordRead);
-        // Do something with the record.
-        // writer.ToString();
+
     }
 }

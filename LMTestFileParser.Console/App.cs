@@ -14,25 +14,22 @@ public class App
 
     public void Run()
     {
-        //var configObject = _csvFileParserService.GetOutputHeaderListFromConfig("BarclaysBank");
-        //  var service = _csvFileParserService.CopyFile("Bank Of Baroda", "ofile.csv");
-        //Console.WriteLine(configObject.SimpleParamConfigs[0].SourceColunn);
-        // _csvFileParserService.SaveFile();
-        _csvFileParserService.ProcessFile("BarclaysBank", "DataExtractor_Example_Input.csv");
-        Console.WriteLine(_csvFileParserService._message);
-        if (_args.Length > 0)
+        if (_args.Length < 2)
+            Console.WriteLine("The application requires two parameters, <Bank Name> <Filepath.csv> ");
+        else
         {
-            string filePath = _args[0];
+            string bankName = _args[0];
+            string filePath = _args[1];
             if (File.Exists(filePath))
             {
-                string content = File.ReadAllText(filePath);
-                Console.WriteLine(content);
+                _csvFileParserService.ProcessFile(bankName, filePath);
+                Console.WriteLine(_csvFileParserService._message);
             }
             else
             {
-                Console.WriteLine($"{_args[0]}");
-                Console.WriteLine("File not found.");
+                Console.WriteLine($"File not found at path {filePath}.");
             }
         }
+
     }
 }
