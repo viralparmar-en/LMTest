@@ -76,9 +76,11 @@ public class CSVFileProcessor : IFileProcessor
             Directory.CreateDirectory(outputDirectory);
         }
         string basePath = AppContext.BaseDirectory;
-        using var writer = new StreamWriter(Path.Combine(basePath, outputDirectory, $"{bankName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv"));
+        string filename = Path.Combine(basePath, outputDirectory, $"{bankName}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
+        using var writer = new StreamWriter(filename);
         using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csv.WriteRecords(records);
+        Console.WriteLine($"Saving successful at {filename}");
         writer.Flush();
 
     }

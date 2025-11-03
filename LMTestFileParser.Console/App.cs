@@ -18,10 +18,12 @@ public class App
             Console.WriteLine("The application requires two parameters, <Bank Name> <Filepath.csv> ");
         else
         {
+            Console.WriteLine("\nStarting......\n");
             string bankName = _args[0];
             string filePath = _args[1];
             if (File.Exists(filePath))
             {
+                Console.WriteLine("Processing......");
                 _csvFileParserService.ProcessFile(bankName, filePath);
                 Console.WriteLine(_csvFileParserService._message);
             }

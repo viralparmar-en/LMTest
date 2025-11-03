@@ -68,6 +68,7 @@ public class CSVFileParserService : IFileParserService
         {
             if (!string.IsNullOrEmpty(bankName))
             {
+                Console.WriteLine("Getting configurations for bank ......");
                 return _configReader.GetConfigByBankName(bankName);
             }
             else
@@ -87,11 +88,13 @@ public class CSVFileParserService : IFileParserService
     {
         try
         {
+            Console.WriteLine("Validating File......");
             if (!string.IsNullOrEmpty(filename))
             {
                 var extension = Path.GetExtension(filename);
                 if (extension.Equals(".csv"))
                 {
+                    Console.WriteLine("Validation Successful......");
                     return true;
                 }
                 else
@@ -119,15 +122,22 @@ public class CSVFileParserService : IFileParserService
             var parseConfig = GetConfigForABank(bankName);
             if (parseConfig == null || string.IsNullOrEmpty(parseConfig.BankName))
                 return false;
+            Console.WriteLine("Configuration Complete......");
 
             if (!CopyFile(bankName, filepath))
                 return false;
+            Console.WriteLine("File copied successfully......");
 
+            Console.WriteLine("\nReading file from......");
             var records = _fileprocessor.ReadFromFile(_fileToProcess, parseConfig.HeaderRowAt);
             if (records == null)
                 return false;
+            Console.WriteLine("\nReading successful......");
 
+            Console.WriteLine("Mapping......");
             parseConfig = GetHeaderIndexMap(parseConfig, records);
+
+            Console.WriteLine("Saving File......\n");
             SaveFile(parseConfig, records);
 
             return true;
@@ -204,6 +214,7 @@ public class CSVFileParserService : IFileParserService
     {
         try
         {
+            Console.WriteLine("Copying file ......");
             if (string.IsNullOrEmpty(bankName) || !IsValidFileType(filepath))
             {
                 _message = $"Bank name and valid file path are required. {_message}";
