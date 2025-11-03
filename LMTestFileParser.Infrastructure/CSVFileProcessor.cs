@@ -1,7 +1,4 @@
-using System.Dynamic;
 using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using CsvHelper;
 using LMTestFileParser.Domain.Models;
 using LMTestFileParser.Infrastructure.Interface;

@@ -17,5 +17,5 @@ public interface IFileParserService
     List<string> GetMissingHeaders();
     bool ProcessFile(string bankName, string filepath);
     string? ProcessComplexColumn(string columnName, string complexColumnValue, string delimiter);
-    bool SaveFile(ConfigModel configModel, List<CSVRowModel> data);
+    List<dynamic> CreateClassObjectForCSVSchema(ConfigModel configModel, List<CSVRowModel> data);
 }

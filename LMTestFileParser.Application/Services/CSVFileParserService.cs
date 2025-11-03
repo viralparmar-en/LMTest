@@ -119,11 +119,14 @@ public class CSVFileParserService : IFileParserService
             if (string.IsNullOrEmpty(bankName) || string.IsNullOrEmpty(filepath) || !IsValidFileType(filepath))
                 return false;
 
+            // Get the config settings for columns in the class object
             var parseConfig = GetConfigForABank(bankName);
             if (parseConfig == null || string.IsNullOrEmpty(parseConfig.BankName))
                 return false;
             Console.WriteLine("Configuration Complete......");
 
+            //create a copy the required file to the application folder to process so as to avoid exception if the file is already in use,
+            //also have a raw copy which was processed for comparison.  
             if (!CopyFile(bankName, filepath))
                 return false;
             Console.WriteLine("File copied successfully......");
@@ -135,10 +138,11 @@ public class CSVFileParserService : IFileParserService
             Console.WriteLine("\nReading successful......");
 
             Console.WriteLine("Mapping......");
+            // Map all the columns required to their indexes.
             parseConfig = GetHeaderIndexMap(parseConfig, records);
 
             Console.WriteLine("Saving File......\n");
-            SaveFile(parseConfig, records);
+            WriteFile(parseConfig.BankName ?? "", CreateClassObjectForCSVSchema(parseConfig, records));
 
             return true;
         }
@@ -167,11 +171,13 @@ public class CSVFileParserService : IFileParserService
         return null;
 
     }
-    public bool SaveFile(ConfigModel configModel, List<CSVRowModel> data)
+    
+    // Create a class object same as schema we require in the output.
+    public List<dynamic> CreateClassObjectForCSVSchema(ConfigModel configModel, List<CSVRowModel> data)
     {
         var records = new List<dynamic>();
         if (configModel == null || string.IsNullOrEmpty(configModel.BankName) || data.Count == 0)
-            return false;
+            return [];
         for (int i = 1; i < data.Count; i++)
         {
             dynamic record = new ExpandoObject();
@@ -207,9 +213,15 @@ public class CSVFileParserService : IFileParserService
             records.Add(record);
         }
 
-        _fileprocessor.WriteToFile(configModel.BankName, records);
-        return true;
+
+        return records;
     }
+
+    private void WriteFile(string bankName, List<dynamic> records)
+    {
+        _fileprocessor.WriteToFile(bankName, records);
+    }
+
     public bool CopyFile(string bankName, string filepath)
     {
         try

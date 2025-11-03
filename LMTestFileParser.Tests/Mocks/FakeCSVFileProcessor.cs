@@ -17,6 +17,6 @@ public class FakeCSVFileProcessor : IFileProcessor
 
     public void WriteToFile(string bankName, List<dynamic> records)
     {
-        throw new NotImplementedException();
+
     }
 }

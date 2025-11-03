@@ -14,6 +14,7 @@ public class App
 
     public void Run()
     {
+        //Check if both the parameters are provided
         if (_args.Length < 2)
             Console.WriteLine("The application requires two parameters, <Bank Name> <Filepath.csv> ");
         else
